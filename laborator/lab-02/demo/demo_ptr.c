@@ -1,35 +1,45 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 
-int *fct_ptr(int, int);
+int global[100];
+
+int *f() {
+	int x = 10;
+	// Compilatorul se prinde ca e prost ce fac => schimba
+	// codul ca sa return NULL
+	return &x;
+}
 
 int main(int argc, char const *argv[])
 {
 	int a = 10;
-	void *p = &a;
 
-	printf("*p = %d\n", *(int *)p);
-	// printf("*(p + 1) = %d\n", *(p + 1));
-	// *(p + 1 * sizeof(???))
-
+	// Pt compilator: stack ~ label pt zona de memorie
 	int stack[100];
-	for (int i = 0; i != 100; ++i)
-		stack[i] = i;
-
-	printf("stack = %p\n", stack);
 	printf("&stack = %p\n", &stack);
+	printf("stack = %p\n", stack);
 
-	int *heap = malloc(1);  // aloca pe heap
-	printf("heap = %p\n", heap);  // pe heap
-	printf("&heap = %p\n", &heap);  // pe stiva
-	*heap = 2;
-	printf("*heap = %d\n", *heap);
+	printf("&global = %p\n", &global);
+	printf("global = %p\n", global);
 
-	// tip (*nume_ptr)(semnatura functiei)
-	// tip *nume_ptr(semnatura functiei) == intoarce tip *
+	// SO ii da unui proces memorie (cel putin cata cere)
+	// SO aloca mult mai mult heap decat 1 byte
+	int *p = malloc(1);
+	*p = 2;
+	printf("&p = %p\n", &p);
+	printf("p = %p\n", p);
+	printf("*p = %d\n", *p);
 
-	int (*main_ptr)(int, char const **) = main;  // = &main (vezi liniile 19-20)
+	// int *main_ptr(int, const char **) == declarare de functie
+	int (*main_ptr)(int, const char **) = main;  // sau &main
+	printf("&main_ptr = %p\n", &main_ptr);
 	printf("main_ptr = %p\n", main_ptr);
+
+	printf("%p\n", f());
+
+	sleep(1);
+	(*main_ptr)(0, NULL);
 
 	return 0;
 }
