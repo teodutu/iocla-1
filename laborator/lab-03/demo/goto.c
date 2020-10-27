@@ -23,8 +23,12 @@ ceva:
 
 	// ceva
 
+	goto after_else;
+
 else_body:
 	// altceva
+
+after_else:
 
 // 	for (ceva) {
 // 		for (alteceva) {
