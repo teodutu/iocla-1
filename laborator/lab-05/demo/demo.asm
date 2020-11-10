@@ -2,7 +2,7 @@
 
 ; var globale INITIALIZATE
 ; int a_dword = 2;
-; short a_short = 3;
+; short a_word = 3;
 ; uint8_t a_byte = 65;
 section .data  ; rw- -> gestionate de SO (pot fi schimbate de mana)
     ; db = define byte -> 8b
@@ -15,8 +15,8 @@ section .data  ; rw- -> gestionate de SO (pot fi schimbate de mana)
     a_word dw 3
     a_char db 'A'
     a_byte db 65
-    a resd 3  ; echivalent cu a-l declara in bss
-    v_int dd 1, 2, 3, 4, 5
+    ; a resd 3  ; echivalent cu a-l declara in bss
+    v dd 1, 2, 3, 4, 5
 
 ; var globale CONSTANTE
 section .rodata  ; r--
@@ -47,7 +47,7 @@ main:
     PRINTF32 `[a_word] = 0x%x\n\x0`, eax
 
     ; memoria = [ 0x05 | 0x00 | 0x41(a_byte) | 0x41(a_char) ]
-    mov eax, [a_short]  ; operanzii au aceeasi dimensiune
+    mov eax, [a_word]  ; operanzii au aceeasi dimensiune
     ; => eax = 0x41410005
     PRINTF32 `eax = 0x%x\n\x0`, eax
 
