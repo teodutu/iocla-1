@@ -27,7 +27,7 @@ main:
 	PRINTF32 `eax = %d | edx = %d\n\x0`, eax, ebx
 
 	; nu stie push < word
-	; pt ca initial era gandit pt 16b si push byte strica alinierea
+	; pt ca initial CPU era gandit pt 16b si push byte strica alinierea
 	push byte 1  ; face de fapt push dword 1
 
 	sub esp, 2
@@ -37,8 +37,9 @@ main:
 
 	; NU afisati esp; il strica PRINTF32
 	mov eax, esp
-	PRINTF32 `%s\n\x0`, eax
+	PRINTF32 `stiva = %s\n\x0`, eax
 
+	; la iesirea din functie stiva trebuie sa fie la fel ca la intrare
 	add esp, 10  ; dword + word + dword = 10B
 
     ret  ; <=> pop eip
