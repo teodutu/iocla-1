@@ -103,6 +103,8 @@ main:
 	push ebp
 	mov ebp, esp
 
+	sub esp, 20  ; var locale
+
 	; enter x, 0
 	; <=>
 	;	push ebp
@@ -124,7 +126,8 @@ main:
 
 	; e bine sa scoatem param de pe stiva
 	; nu e obligatoriu
-	add esp, 10  ; 4 + 4 + 2
+	add esp, 10  ; sizeof(*len) + sizeof(v) + sizeof(el)
+	; nu vreau sa scot si var locale de pe stiva
 
 	PRINTF32 `numarul de aparitii = %d\n\x0`, eax
 
