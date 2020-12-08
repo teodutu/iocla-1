@@ -5,6 +5,15 @@ struc demo_struct
 	int_x resd 1
 	str_z resb 100
 endstruc
+; [ short_y (2B) | int_x (4B) | "Manele 2021\0" ]
+
+; in C:
+; struct demo_struct2 {
+;   int int_x;
+;   short short_y;
+;   long long long_z;
+; } => compilatorul pune padding => sizeof(struct demo_struct2) = 16
+; [ int_x (4B) | short_y (2B) | padding (nimic) (2B) | long_z (8B) ]
 
 section .data
 	fmt_hex db "%x", 10, 0
@@ -17,7 +26,7 @@ section .data
 			at int_x, dd 0x12345678
 			at str_z, db "Manele 2021", 0
 		iend
-	; [0xcd | 0xab | 0x78 | 0x56 | 0x34 | 0x12 | "Manele 2021", 0]
+	; [0xcd | 0xab | 0x78 | 0x56 | 0x34 | 0x12 | "Manele 2021\0" 0, 0, ... (pana la 100B)]
 
 section .text
 
@@ -40,8 +49,7 @@ main:
 	push fmt_int
 	call printf
 
-	; sizeof(struct demo_struct)
-	; pt orice struct, NASM defineste <nume_struct>_size
+	; sizeof(struct demo_struct) == <nume_struct>_size (definit de NASM)
 	push demo_struct_size
 	push fmt_int
 	call printf
