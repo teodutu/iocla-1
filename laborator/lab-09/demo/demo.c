@@ -4,51 +4,41 @@ int v[] = {10, 22, 39, 9, 11, 5};  // in .data
 
 int main(void)
 {
-	int max;
 	int len = sizeof(v) / sizeof(*v);
+	printf("%d\n", len);
 
-	/**
-	 * Inline asm:
-	 * 	- sintaxa depinde de compilator
-	 * 	- folosim sintaxa GCC
-	 * __asm__(
-	 * 	"instructiuni asm"
-	 * 	: "=r" (output1), "=m" (output2)  // = inseamna output;
-	 * 		r => CPL pune output1 = reg oarecare
-	 * 		m = memorie => CPL considera output2 ca fiind ptr
-	 * 		output1, output2 = variabile din C
-	 *  : "r" (input)  // inputuri; aceiasi specificatori ca la output
-	 *  : "eax", "ebx"  // ce reg folosim in instructiuni -> sa stie CPL ce sa salveze inainte
-	 * )
-	 *
-	 * https://gcc.gnu.org/onlinedocs/gcc/Simple-Constraints.html#Simple-Constraints
-	 */
+	int max;
+
+	// In general, sintaxa pentru inline asm depinde de compilator
+	// Mai jos e sintaxa pentru GCC
 
 	// Calculam max(v)
-	// NU E FUNCTIE => NU TREBUIE SA RESPECTAM NICIO CONVENTIE
+	// NU E FUNCTIE => nu trebuie respectata conventia _cdecl
 	// trebuie sa lasam stiva cum era la inceput
 	__asm__(
+		// %2 = parametrul 2 dat ca out/in
 		"mov ecx, %2\n"  // ecx = len
-		"mov eax, [%1]\n"  // eax = v[0]
-		"dec ecx\n"  // parcurg v[5] -> v[1]
+		"mov eax, [%1]\n"  // %1 = v
+		"dec ecx\n"
 		"compute_max:\n"
-		"cmp eax, [%1 + ecx * 4]\n"  // %1 e tot un reg
+		"cmp eax, [%1 + ecx * 4]\n"
 		"jge continue\n"
 		"mov eax, [%1 + ecx * 4]\n"
 		"continue:\n"
 		"loop compute_max\n"
-		"mov %0, eax\n"  // CPL face si trecerea de la reg %0 la variabila max
-		: "=r" (max)  // output; max = %0
-		: "r" (v), "r" (len)  // input; v = %1; len = %2
-		: "ecx", "eax"
+		"mov %0, eax\n"  // %0 = max
+		: "=r" (max)  // OUTPUT; r -> CPL o sa puna max intr-un reg oarecare
+		// r => ne referim la param respectiv ca si cum ar fi un registru oarecare
+		// m => ne referim la param respectiv ca si cum ar fi pointer (memorie)
+		: "m" (v), "r" (len)  // INPUT
+		: "eax", "ecx"  // specificam ce registre folosim in codul de mai sus
 	);
-
-	// lea eax, [eax * 2] <=> eax *= 2; lea = load effective address
 
 	printf("max = %d\n", max);
 
-	// Pt ex 6+ -> param pe 64 NU se pun pe stiva ci in reg:
-	//		RDI, RSI, RDX, RCX, R8, R9
+	// param pe 64 nu se pun pe stiva, ci in registre, in ordinea asta:
+	//	rdi, rsi, rdx, rcx, r8, r9, urmatorii pe stiva
+	//	r8 - r15 = reg noi pe 64b, r8d = 32b; r8w = 16b
 
 	return 0;
 }

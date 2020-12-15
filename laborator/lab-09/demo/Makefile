@@ -2,7 +2,7 @@
 # USO remembers
 
 CC=gcc
-CFLAGS=-m32 -masm=intel
+CFLAGS=-m32 -masm=intel -std=gnu11
 
 all: demo
 
