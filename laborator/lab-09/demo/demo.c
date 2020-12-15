@@ -2,12 +2,44 @@
 
 int v[] = {10, 22, 39, 9, 11, 5};  // in .data
 
+static __attribute__((always_inline)) int static_max_always_inline(int a, int b)
+{
+	return a > b ? a : b;
+}
+
+__attribute__((always_inline)) int max_always_inline(int a, int b)
+{
+	return a > b ? a : b;
+}
+
+// Nu functioneaza din cauza ca nu se defineste un simbol pentru max_inline
+// Cititi sectiunea "ISO C inline semantics" din linkul de mai jos pentru detalii
+// https://runtimeverification.com/blog/undefined-c-common-mistakes/
+// inline int max_inline(int a, int b)
+// {
+// 	return a > b ? a : b;
+// }
+
+// Functioneaza pentru ca `static` restrange vizibilitatea functiei la fisierul
+// curent, ceea ce forteaza compilatorul sa defineasca un simbol pentru functie
+static inline int static_max_inline(int a, int b)
+{
+	return a > b ? a : b;
+}
+
 int main(void)
 {
-	int len = sizeof(v) / sizeof(*v);
-	printf("%d\n", len);
+	int max = static_max_always_inline(5, 10);
+	printf("static_max_always_inline(5, 10) = %d\n", max);
 
-	int max;
+	max = max_always_inline(5, 10);
+	printf("max_always_inline(5, 10) = %d\n", max);
+
+	max = static_max_inline(5, 10);
+	printf("static_max_inline(5, 10) = %d\n", max);
+
+	int len = sizeof(v) / sizeof(*v);
+	printf("len = %d\n", len);
 
 	// In general, sintaxa pentru inline asm depinde de compilator
 	// Mai jos e sintaxa pentru GCC
