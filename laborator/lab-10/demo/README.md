@@ -51,8 +51,8 @@ Acum stim tot ce avem neovie ca sa cream atacul. El consta in formarea unui
 trebuie sa contina un **padding** (caractere de umplutura) cu lungimea de
 `0x2c + 4` caractere, cu care sa "umplem" stiva de unde citeste `scanf()`-ul si
 pana la `EIP`-ul pe care vrem sa-l suprascriem, urmat de adresa de la care vrem
-sa se execute codul. Adresa asta o luam tot din output-ul `objdumpului`, si
-anume `0x080491b6`.
+sa se execute codul. Adresa asta o luam tot din outputul din `objdump`, si anume
+`0x080491b6`.
 
 Cel mai simplu mod sa cream un astfel de string e in *Python*:
 ```
@@ -79,21 +79,22 @@ pop ebp
 Pentru atacul pe care vrem sa-l facem, avem nevoie de crearea unui cadru de
 stiva pentru functia `read_data()` si de aici nevoia de flagul asta.
 
-### fno-stack-protector
+### -fno-stack-protector
 Pentru a proteja programul de atacuri de tip *buffer overflow*, compilatorul
 adauga pe stiva, intre variabilele locale si `EBP`-ul functiei apelante ceea ce
 se cheama
 [stack canaries](https://en.wikipedia.org/wiki/Buffer_overflow_protection#Canaries).
 Ele sunt cel mai adesea niste valori generate aleator la runtime. Practic, se
 generaza **o singura valoare** pentru fieacre proces, care este scrisa pe stiva
-tuturor functiilor acelui proces. La finalul functiei, inainte de `leave; ret`,
-se verifica daca valoarea de pe stiva este egala cu cea generata initial. In caz
-contrar, executia se inchide imediat si sa afiseaza:
+tuturor functiilor acelui proces intre variabilele locale si `EBP`-ul
+apelantului. La finalul functiei, inainte de `leave; ret`, se verifica daca
+valoarea scrisa atnerior pe stiva este egala cu cea generata initial. In caz
+contrar, executia se incheie imediat si sa afiseaza:
 ```
 *** stack smashing detected ***: <fisier_executabil> terminated
 Aborted (core dumped)
 ```
-Deci *stack canaries* previn suprascrierea prin *buffer overflow* a valorilor
+Deci, *stack canaries* previn suprascrierea prin *buffer overflow* a valorilor
 `EBP`-ului si `EIP`-ului apelantului.
 
 ### -no-pie

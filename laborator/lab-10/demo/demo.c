@@ -13,13 +13,15 @@ void rip_dani_mocanu()
 
 void read_data()
 {
-	int x = 2;
+	unsigned int x = 2;
 	char s[32];
-	x = 3;
 
 	printf("RIP Dani Mocanu!\n");
+
 	scanf("%s", s);
+	printf("0x%08X\n", x);
 }
+
 
 int main(void)
 {
