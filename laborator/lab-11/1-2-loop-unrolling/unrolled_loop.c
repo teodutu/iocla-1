@@ -16,6 +16,9 @@ int main()
     /* Included some NOPs to aid identifying assembly code */
     __asm__ volatile("nop; nop; nop;");
 
+    // Acelasi nr de adunari
+    // De 4 ori mai putine cmp + jmp
+    // Minor: folosim mai multa memorie (sum1, sum2, ...)
     for (i = 0; i < N; i += 4)
     {
         sum1 += list[i];
