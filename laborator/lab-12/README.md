@@ -1,4 +1,6 @@
-# Linking
+# Laborator 12: Linking
+
+<!-- Convert to DokuWiki format using Pandoc: pandoc -f markdown_github-hard_line_breaks -t dokuwiki README.md -->
 
 Linking / Legare este faza finală a procesului de build.
 Linking unifică mai multe fișiere obiect în fișier executabil.
@@ -149,7 +151,8 @@ Astfel:
 * `R`: simbolul este în zona de date read-only (`.rodata`), exportat
 * `b`: simbolul este în zona de date neinițializate (`.bss`), neexportat
 * `B`: simbolul este în zona de date neinițializate (`.bss`), exportat
-* `U`: simbolul este nedefinit (este folosit în modulul curent, dar e folosit în alte module)
+* `U`: simbolul este nedefinit (este folosit în modulul curent, dar este definit în alt modul)
+
 Alte informații se găsesc în pagina de manual a utilitarul `nm`.
 
 Cu ajutorul comenzii `objdump` dezasamblăm codul fișierelor obiect și a fișierelor executabile.
@@ -204,13 +207,57 @@ Hex dump of section '.rodata':
   0x080484e8 6f726c64 2100                       orld!.
 ```
 
+## Feedback
+
+Pentru a îmbunătăți cursul de IOCLA, componentele sale și modul de desfășurare, ne sunt foarte utile opiniile voastre.
+Pentru aceasta, vă rugăm să accesați și completați formularul de feedback de pe site-ul [curs.upb.ro](https://curs.upb.ro/).
+Trebuie să fiți autentificați și înrolați în cadrul cursului.
+
+Formularul este anonim și este activ în perioada 18 ianuarie 2021 - 29 ianuarie 2021.
+Rezultatele vor fi vizibile în cadrul echipei cursului doar după încheierea sesiunii.
+Puteți accesa formularul de feedback începând cu 18 ianuarie 2021.
+Este accesibil la link-ul "Formular feedback" a paginii principale a cursului de IOCLA al seriei voastre.
+Nu este în meta-cursul disponibil tuturor seriilor.
+
+Vă invităm să evaluați activitatea echipei de IOCLA și să precizați punctele tari și punctele slabe și sugestiile voastre de îmbunătățire a disciplinei.
+Feedbackul vostru ne ajută să creștem calitatea materiei în anii următori și să îmbunătățim disciplinele pe care le veți face în continuare.
+
+Vom publica la începutul semestrului viitor analiza feedbackului vostru.
+
+Ne interesează în special:
+1. Ce nu v-a plăcut și ce credeți că nu a mers bine?
+1. De ce nu v-a plăcut și de ce credeți că nu a mers bine?
+1. Ce ar trebui să facem ca lucrurile să fie plăcute și să meargă bine?
+
 ## Exerciții
+
+În cadrul laboratoarelor vom folosi repository-ul de Git de IOCLA: https://github.com/systems-cs-pub-ro/iocla.
+Repository-ul este clonat pe desktopul mașinii virtuale.
+Pentru a îl actualiza, folosiți comanda `git pull origin master` din interiorul directorului în care se află repository-ul (`~/Desktop/iocla`).
+Recomandarea este să îl actualizați cât mai frecvent, înainte să începeți lucrul, pentru a vă asigura că aveți versiunea cea mai recentă.
+Dacă doriți să descărcați repository-ul în alt loc (`{target}`), folosiți comanda
+```
+git clone https://github.com/systems-cs-pub-ro/iocla ${target}
+```
+Pentru mai multe informații despre folosirea utilitarului `git`, urmați ghidul de la [Git Immersion](https://gitimmersion.com/).
+
+Cele mai multe dintre exerciții se desfășoară pe o arhitectură x86 (32 de biți, i386).
+Pentru a putea compila / linka pe 32 de biți atunci când sistemul vostru este pe 64 de biți, aveți nevoie de pachete specifice.
+Pe o distribuție Debian / Ubuntu, instalați pachetele folosind comanda:
+```
+sudo apt install gcc-multilib libc6-dev-i386
+```
 
 Pentru exersarea informațiilor legate de linking, parcurgem mai multe exerciții.
 În cea mai mare parte, aceste exerciții sunt exerciții în care observăm ce se întâmplă în procesul de linking, cele marcate cu sufixul `-tut` sau `-obs`.
 Unele exerciții necesită modificări pentru a repara probleme legate de linking, cele marcate cu sufixul `-fix`.
 Alte exerciții sunt exersarea unor noțiuni (cele marcate cu sufixul `-diy`) sau dezvoltarea / completarea unor fișiere (cele marcate cu sufixul `-dev`).
 Fiecare exercițiu se găsește într-un director indexat; cele mai multe fișiere cod sursă și fișiere `Makefile` sunt deja prezente.
+
+### 00. Hey! Hey, listen!
+
+Dacă ne oferiți feedback, ne ajutați să ~~îl facem pe Lunk mai puternic~~ îmbunătățim materia.
+Mergeți la secțiunea [feedback](#feedback) pentru detalii.
 
 ### 01. Linkarea unui singur fișier
 
@@ -230,14 +277,14 @@ Folosim comanda `file hello` pentru a urmări daca fișierul este compilat dinam
 Este comentată o comandă echivalentă care folosește direct `ld`.
 Pentru a urmări folosirea directă a `ld`, putem comenta comanda `gcc` și decomenta comanda `ld`.
 
-În cazul `c-standalone`, pentru că nu folosim biblioteca standard C sau bibliotecă runtime C, trebuie să înlocuim funcționalitățile acestora.
+În cazul `c-standalone/`, pentru că nu folosim biblioteca standard C sau bibliotecă runtime C, trebuie să înlocuim funcționalitățile acestora.
 Funcționalitățile sunt înlocuite în fișierul `start.asm` și `puts.asm`.
 Aceste fișiere implementează, respectiv, funcția / simbolul `_start` și funcția `puts`.
 Funcția / simbolul `_start` este, în mod implicit, entry pointul unui program executabil.
 Funcția `_start` este responsabilă pentru apelul funcției `main` și încheierea programului.
 Pentru că nu există bibliotecă standard, aceste două fișiere sunt scrise în limbaj de asamblare și folosesc apeluri de sistem.
 
-**Bonus**: Adăugați în fișierul `c-standalone/` o comandă care folosește explicit `ld` pentru linkare.
+**Bonus**: Adăugați, în fișierul `Makefile` din directorul `c-standalone/`, o comandă care folosește explicit `ld` pentru linkare.
 
 ### 02. Linkarea unui singur fișier
 
@@ -248,10 +295,14 @@ Copiați fișierele `Makefile` și actualizați-le în fiecare subdirector pentr
 
 ### 03. Linkarea mai multor fișiere
 
-Accesăm directorulA `03-multiple-tut/`.
+Accesăm directorul `03-multiple-tut/`.
 Vrem să urmărim comenzile de linkare din fișiere multiple cod sursă C: `main.c`, `add.c`, `sub.c`.
 
-La fel ca în exercițiile de mai sus, sunt trei subdirectoare pentru aceleași scenarii.
+La fel ca în exercițiile de mai sus, sunt trei subdirectoare pentru trei scenarii diferite:
+* `a-no-header/`: declararea funcțiilor externe se face direct în fișierul sursă C (`main.c`)
+* `b-header/`: declararea funcțiilor externe se face într-un fișier header separat (`ops.h)
+* `c-lib/`: declararea funcțiilor externe se face într-un fișier header separat, iar linkarea se face folosind o bibliotecă statică
+
 În fiecare subdirector folosim comanda `make` pentru a compila fișierul executabil `main`.
 
 ### 04. Linkarea mai multor fișiere
@@ -287,8 +338,8 @@ Rulați comanda `make`, interpretați eroarea întâlnită și rezolvați-o prin
 Accesați subdirectorul `b-asm/`.
 Rulați comanda `make`, interpretați eroarea întâlnită și rezolvați-o prin editarea fișierului `hello.asm`.
 
-**Bonus**: În subdirectoarele `c-extra-nolibc/` și `c-extra-libc/` găsiți soluții care nu modifică codul sursă al `hello.c`.
-Modifică sistemul de build pentru a folosi altă functie, în loc de `main()`, ca prima funcție a programului.
+**Bonus**: În subdirectoarele `c-extra-nolibc/` și `d-extra-libc/` găsiți soluții care nu modifică codul sursă al `hello.c`.
+Aceste soluții modifică, în schimb, sistemul de build pentru a folosi altă funcție, diferită de `main()`, ca prima funcție a programului.
 
 ### 07. Repararea entry pointului
 
@@ -338,11 +389,13 @@ $ nm sub.o
 ```
 Numele simbolurilor nu sunt `add`, respectiv `sub`, ci sunt `_Z3addii` și `_Z3subii`.
 Numele simbolurilor C++ sunt *mangled* și definesc signatura funcției.
-Acest lucru se întâmplă pentru a permite funcții cu același nume cu signaturi diferite.
-Detalii despre *name mangling* sunt [aici](https://en.wikipedia.org/wiki/Name_mangling).
+Acest lucru se întâmplă pentru a permite funcții cu același nume, dar cu signaturi diferite.
+Detalii despre *name mangling* găsiți [aici](https://en.wikipedia.org/wiki/Name_mangling).
 
-Pentru a rezolva acest lucru, trebuie ca acele simboluri definite C și importate în C++, sau invers, să fie prefixate cu declarația `extern "C"`.
+Pentru a rezolva acest lucru, trebuie ca simbolurile definite C și importate în C++, sau invers, să fie prefixate cu directiva `extern "C"`.
+În felul acesta, compilatorul C++ va folosi numele simple pentru simbolurile importate / exportate, pentru a fi folosite împreună cu module C.
 Acest lucru este realizat în subdirectorul `good/`.
+Detalii despre directiva `extern "C"` găsiți [aici](https://stackoverflow.com/a/1041880/4804196).
 
 ### 13. Linkare fișier obiect (fără fișier cod sursă)
 
