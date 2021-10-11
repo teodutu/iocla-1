@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(int argc, char const *argv[])
+int main(void)
 {
 	int x = 1 << 4;  // 1 << a == pow(2, a)
 	printf("x = %d\n", x);  // n = 0b00001110; n << 2 = 0b00111000
@@ -15,6 +15,7 @@ int main(int argc, char const *argv[])
 	printf("long_long_x_correct = %lld\n", long_long_x_correct);
 
 	// Precedenta <=> ordinea efectuarii operatiilor
+	// https://en.cppreference.com/w/c/language/operator_precedence
 	// in ordinea: *, /;    +, -;     &, |, ^, <<, >>
 	int y = 1 + 1 << 3;  // == (1 + 1) << 3
 	printf("1 + 1 << 3 = %d\n", y);

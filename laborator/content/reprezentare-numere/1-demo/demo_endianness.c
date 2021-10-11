@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(int argc, char const *argv[])
+int main(void)
 {
 	int x = 0x12345678;
 	printf("&x = %p\n", &x);
