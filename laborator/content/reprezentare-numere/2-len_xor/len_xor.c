@@ -10,8 +10,8 @@ int my_strlen(const char *str)
 void equality_check(const char *str)
 {
 	/* TODO */
-	// str[i] == str[i + pow(2, i)]
-	// memcmp(str + ..., str + ..., sizeof(*str));
+	// s[i] == s[i + pow(2, i)]
+	// hint: a == b <=> !(a ^ b)
 }
 
 int main(void)

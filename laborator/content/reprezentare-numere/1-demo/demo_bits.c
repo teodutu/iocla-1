@@ -37,8 +37,9 @@ int main(void)
 	^:
 	1 ^ 1 = 0
 	1 ^ 0 = 1
-
-	a = 0 <=> a ^= a <- de retinut
+	a ^ a = 0
+	a = 0 <=> a ^= a
+	a == b <=> !(a ^ b) <- pt ex 2
 	*/
 
 	// 0b000001 => 0b001000
