@@ -2,14 +2,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-// Pointer in .data; string in .rodata
+// array static == label => totul e in .data
+char global_str1[] = "manele";
+char global_str2[] = "manele";
+
+// pointer in .data; valoare in .rodata
+int *global_int = 1;
 char *global_ct_str = "manele";
 
-// .data
-// Desi au aceeasi valoare, stringurile sunt zone diferite de memorie,
-// pentru ca nu sunt constante 
-char global_str1[] = "florin salam";
-char global_str2[] = "florin salam";
+int global_a = 0x12345678;  // in .data
+const int global_const_a = 0x12345678;  // in .rodata
+
 
 int main(int argc, char const **argv)
 {
@@ -22,24 +25,19 @@ int main(int argc, char const **argv)
 	printf("&global_ct_str = %p\n", &global_ct_str);
 	printf("global_ct_str = %p\n\n", global_ct_str);
 
-	global_ct_str = "florin salam";
-	printf("global_ct_str = %p\n\n", global_ct_str);
-
 	// Pointer pe stiva, string in .rodata
-	char *stack_ct_str = "manele";
-	printf("&stack_ct_str = %p\n", &stack_ct_str);
-	printf("stack_ct_str = %p\n\n", stack_ct_str);
+	char *stack_str = "manele";
+	printf("&stack_str = %p\n", &stack_str);
+	printf("stack_str = %p\n\n", stack_str);
 
 	printf("&global_str1 = %p\n", &global_str1);
 	printf("global_str1 = %p\n\n", global_str1);
+
 	printf("&global_str2 = %p\n", &global_str2);
 	printf("global_str2 = %p\n\n", global_str2);
 
-	// Array-urile statice sunt doar labeluri pt zona de memorie
-	// "florin salam" e pus pe stiva
-	char stack_str[] = "florin salam";
-	printf("&stack_str = %p\n", &stack_str);
-	printf("stack_str = %p\n\n", stack_str);
+	printf("&global_int = %p\n", &global_int);
+	printf("global_int = %p\n\n", global_int);
 
 	int *heap_ptr = malloc(1);  // aloc 1 byte
 	// SO aloca mai mult heap la inceputul rularii => nu da seg fault.
@@ -48,16 +46,28 @@ int main(int argc, char const **argv)
 	printf("heap_ptr = %p\n", heap_ptr);
 	printf("heap_ptr[1000] = %d\n\n", heap_ptr[1000]);
 
-	int (*mai_ptr)(int, char const **) = main;
-	printf("&main_ptr = %p\n", &mai_ptr);
-	printf("main_ptr = %p\n\n", mai_ptr);
+	int (*main_ptr)(int, char const **) = main;
+	printf("&main_ptr = %p\n", &main_ptr);
+	printf("main_ptr = %p\n\n", main_ptr);
 
 	printf("printf = %p\n\n", printf);
 
-	sleep(5);
-	mai_ptr(0, NULL);
+	int b = 0x12345678;  // pe stiva (RW)
+	const int stack_b = 0x12345678;  // pe stiva (RW)
+	// Aici `const` nu inseamna nimic dupa compilare pentru ca permisiunile
+	// stivei sunt RW.
+	// La variabilele globale const are sens si la rulare pentru ca .rodata
+	// si .data sunt zone diferite.
 
-	// sleep(1000);
+	global_ct_str = "manele 2022";
+
+	// Pentru ca `global_str1` e doar un label si desemneaza o zona de
+	// memorie, compilatorul ii stie dimensiunea. 
+	printf("sizeof(global_str1) = %zu\n", sizeof(global_str1));
+
+	// Compilatorul calculeaza ce stie la runtime la ce pointeaza
+	// `global_ct_str`: la "manele", "manele 2022" sau altceva?
+	printf("sizeof(global_ct_str) = %zu\n", sizeof(global_ct_str));
 
 	return 0;
 }
