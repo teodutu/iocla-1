@@ -69,5 +69,8 @@ int main(int argc, char const **argv)
 	// `global_ct_str`: la "manele", "manele 2022" sau altceva?
 	printf("sizeof(global_ct_str) = %zu\n", sizeof(global_ct_str));
 
+	// sleep(5);
+	// mai_ptr(0, NULL);
+
 	return 0;
 }
