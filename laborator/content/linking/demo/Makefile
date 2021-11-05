@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -m32 -fPIC
+CFLAGS = -m32 -fno-PIC
+CFLAGS_LIB = -m32 -fPIC -shared
 LDFLAGS = -m32 -no-pie
 LDFLAGS_STATIC = $(LDFLAGS) -static
 
@@ -21,7 +22,7 @@ prog_lib_dyn: main.o libutils.so
 	$(CC) $(LDFLAGS) $< -o $@ -lutils -L.
 
 libutils.so: arr_sum.o print.o
-	$(CC) $(LDFLAGS) -shared $^ -o $@
+	$(CC) $(CFLAGS_LIB) $^ -o $@
 
 
 # Doar biblioteca e statica

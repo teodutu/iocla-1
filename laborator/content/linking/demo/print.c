@@ -2,5 +2,8 @@
 
 void print_arg(unsigned long arg)
 {
-	printf("0x%lx\n", arg);
+	static int x;
+	x++;
+
+	printf("x = %d; 0x%lx\n", x, arg);
 }

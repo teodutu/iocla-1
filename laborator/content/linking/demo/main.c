@@ -10,6 +10,7 @@ int main(int argc, char **argv, char **envp)
 
 	printf("sum = %d\n", sum);
 	print_arg(20);
+	print_arg(30);
 
 	return 0;
 }
