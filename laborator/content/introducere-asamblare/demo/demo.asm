@@ -9,69 +9,67 @@ section .rodata
 
 section .text
 main:
-	; mov dest, src
+	; <menmonica> dest, src
 	mov eax, 0x12345678
 	mov eax, 1337		; eax = 1337
 	mov ebx, eax		; ebx = eax
 
 	PRINTF32 `eax = %d, ebx = %d\n\x0`, eax, ebx
 
-	; operatii
 	mov eax, 1
 	mov ebx, 2
-	add eax, ebx
+	add eax, ebx		; eax += ebx
 	PRINTF32 `eax = 1 + 2 = %d\n\x0`, eax
-
-	mov eax, 3
-	mov ebx, 2
-	sub eax, ebx
-	PRINTF32 `eax = 3 - 2 = %d\n\x0`, eax
+	; sub, and, or, xor, not (~)
+	; exista si mul (*), div (/): TBC
 
 	mov eax, 4
-	shr eax, 2		; eax >> 2
+	shr eax, 2		; eax >>= 2
 	PRINTF32 `eax = 4 >> 2 = %d\n\x0`, eax
 
-	shl eax, 3		; eax << 3
+	shl eax, 3		; eax <<= 3
 	PRINTF32 `eax = 1 << 3 = %d\n\x0`, eax
 
-	mov eax, 3
-	and eax, 2		; or, xor, not
-	PRINTF32 `eax = 3 & 2 = %d\n\x0`, eax
-
-	jmp skip
-	PRINTF32 `%s\x0`, not_printed
-skip:
-	PRINTF32 `%s\x0`, printed
-
-	; EFLAGS:
-	;	- ZF = zero flag = cand ultima operatie a dat 0
-	;	- SF = sign flag = cand ultima operatie a activat bitul de semn
-	;	- CF = carry flag = se depaseste dimensiunea registrului
+	; EFLAGS - doar pt operatii matematice
+	;	- ZF = zero flag = ultima operatie a dat 0; ex: `xor eax, eax`
+	;	- SF = sign flag = ultima operatie a activat bitul de semn
+	;	- CF = carry flag = ultima operatie a depasit dimensiunea registrului
 	;
-	; j[n]<flag> addr = if ([!]<flag>) jmp addr
-
-	; CF
-	mov al, 200
-	mov bl, 100
-	add al, bl
-	jc carry
-
-	PRINTF32 `%s\x0`, not_printed
-carry:
-	PRINTF32 `%s\x0`, printed
+	; j[n]<flag> addr <=> if ([not] <flag>) jmp addr
 
 	mov eax, 1
-	mov ebx, -2
-	cmp eax, ebx		; "in spate": tmp = eax - ebx 
-	jg exit
+	sub eax, 2
+	js sign
 
-	PRINTF32 `%s\x0`, not_printed
+	PRINTF32 `sign - %s\x0`, not_printed
 
-exit:
-	PRINTF32 `%s\x0`, printed
+sign:
+	PRINTF32 `sign - %s\x0`, printed
 
-	; jl/jg = </> CU SEMN
-	; jb/ja = </> FARA SEMN
+	mov al, 200
+	add al, 100
+	jc carry
+
+	PRINTF32 `carry - %s\x0`, not_printed
+
+carry:
+	PRINTF32 `carry - %s\x0`, printed
+
+	; cmp
+	mov eax, -1		; 0xffffffff
+	mov ebx, 2		; 0x00000002
+	cmp eax, ebx		; CPU-ul seteaza EFLAGS conform cu `eax - ebx` 
+	jl smaller
+
+	; jb (jump below) -> UNISGNED
+	; jl (jump lower) -> SIGNED
+	; jb/ja = below/above = </> UNSIGNED
+	; jl/jg = lower/greater = </> SIGNED
+
+	PRINTF32 `smaller - %s\x0`, not_printed
+
+smaller:
+	PRINTF32 `smaller - %s\x0`, printed
 
 	xor eax, eax
 	ret
