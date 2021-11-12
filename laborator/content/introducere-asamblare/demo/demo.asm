@@ -63,15 +63,15 @@ carry:
 	mov eax, 1
 	mov ebx, -2
 	cmp eax, ebx		; "in spate": tmp = eax - ebx 
-	jb exit
+	jg exit
 
 	PRINTF32 `%s\x0`, not_printed
 
 exit:
 	PRINTF32 `%s\x0`, printed
 
-	; jl/jg = </> FARA SEMN
-	; jb/ja = </> CU SEMN
+	; jl/jg = </> CU SEMN
+	; jb/ja = </> FARA SEMN
 
 	xor eax, eax
 	ret
