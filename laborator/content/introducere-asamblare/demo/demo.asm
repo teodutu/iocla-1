@@ -69,7 +69,30 @@ carry:
 	PRINTF32 `smaller - %s\x0`, not_printed
 
 smaller:
-	PRINTF32 `smaller - %s\x0`, printed
+	PRINTF32 `smaller - %s\n\x0`, printed
+
+	; while (ecx != 0)
+	mov ecx, 3
+print_while:
+	test ecx, ecx		; ecx & ecx <=> if (ecx == 0)
+	jz out_while
+
+	PRINTF32 `while body: ecx = %d\n\x0`, ecx
+
+	dec ecx
+	jmp print_while
+
+out_while:
+
+	PRINTF32 `\nend while\n\n\x0`
+
+	; do-while (evx != 0)
+	mov ecx, 3
+print_do_while:
+	PRINTF32 `do-while body: ecx = %d\n\x0`, ecx
+
+	dec ecx
+	jnz print_do_while
 
 	xor eax, eax
 	ret
