@@ -5,7 +5,7 @@ struc demo_struct
 	int_x resd 1
 	str_z resb 100
 endstruc
-; [ short_y (2B) | int_x (4B) | "Manele 2021\0" ]
+; [ short_y (2B) | int_x (4B) | "Manele 2022\0" ]
 
 ; in C:
 ; struct demo_struct2 {
@@ -18,10 +18,10 @@ section .data
 	demo:
 		istruc demo_struct
 			at short_y, dw 0xabcd
-			at int_x, dd 0x12345678
-			at str_z, db "Manele 2021", 0
+			at 2, dd 0x12345678
+			at str_z, db "Manele 2022", 0
 		iend
-	; [0xcd | 0xab | 0x78 | 0x56 | 0x34 | 0x12 | "Manele 2021\0" 0, 0, ... (pana la 100B)]
+	; [0xcd | 0xab | 0x78 | 0x56 | 0x34 | 0x12 | "Manele 2022\0" 0, 0, ... (pana la 100B)]
 
 	arr: dd 1, 22, 32, 45
 
@@ -35,12 +35,14 @@ print_pos:
     push ebp
     mov ebp, esp
 
-	mov eax, [ebp + 8]	; eax = arr
-	mov ecx, [ebp + 12]	; ecx = pos
-	
-	mov eax, [eax + ecx * 4]	; arr[pos]
+	mov eax, [ebp + 8]		; arr -> ebp + 8
+	mov ecx, [ebp + 12]		; pos -> ebp + 12
 
-	PRINTF32 `arr[pos] = %d\n\x0`, eax
+	PRINTF32 `arr[pos] = %d\n\x0`, [eax + ecx * 4]		; arr[pos]
+
+	mov dword [eax + ecx * 4], 8
+
+	PRINTF32 `arr[pos] = %d\n\x0`, [eax + ecx * 4]
 
 	leave
     ret
@@ -51,11 +53,12 @@ main:
     mov ebp, esp
 
 	PRINTF32 `int_x = %d\n\x0`, int_x
+	PRINTF32 `str_z = %d\n\x0`, str_z
 
-	mov eax, [demo + 2]
+	mov eax, [demo + int_x]
 	PRINTF32 `demo.int_x = 0x%x\n\x0`, eax
 
-	push 2	; pos = 2
+	push 2
 	push arr
 	call print_pos
 
