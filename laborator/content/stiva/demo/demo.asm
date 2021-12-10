@@ -1,45 +1,52 @@
 %include "../utils/printf32.asm"
 
-section .data
-	a dd 0x12345678
-	s db "Dorel"
-
 
 section .text
 
 extern printf
+extern exit
+
 global main
 
 main:
+	mov ebp, esp
+
 	mov eax, 2
 	mov ebx, 3
 
 	; xchg eax, ebx
-	push eax  ; <=> sub esp, 4; mov [esp], eax
+	; push eax
+	; mov eax, ebx
+	; pop ebx
+	push eax
 	push ebx
 	; stiva:
-	;	eax
-	;	ebx
-
-	pop eax  ; <=> mov eax, [esp]; add esp, 4
+    ;       eax
+    ;       ebx
+	pop eax
 	pop ebx
 
-	PRINTF32 `eax = %d | edx = %d\n\x0`, eax, ebx
+	PRINTF32 `eax = %d, ebx = %d\n\x0`, eax, ebx
 
-	; nu stie push < word
-	; pt ca initial CPU era gandit pt 16b si push byte strica alinierea
-	push byte 1  ; face de fapt push dword 1
+	; CPU nu stie push < word
+    ; pt ca initial CPU era gandit pt 16b si push byte strica alinierea
+    push byte 20  ; face de fapt push dword 20: lungimea cuvantului = 4B
 
-	sub esp, 2
-	mov [esp], word 65  ; 65 = 0x0041 -> 0x41 0x00 (l endian)
+	; [0x41 | 0x00] -> se pun 2B pe stiva
+	push word 0x41
 
-	push dword "asdf"
-
-	; NU afisati esp; il strica PRINTF32
+	; NU afisati nimic prin esp; il strica PRINTF32
 	mov eax, esp
-	PRINTF32 `stiva = %s\n\x0`, eax
+	PRINTF32 `esp = 0x%hx\n\x0`, dword [eax]
+
+	; [a b c d]
+	push 'abcd'
+
+	mov eax, esp
+	PRINTF32 `esp = %s\n\x0`, eax
 
 	; la iesirea din functie stiva trebuie sa fie la fel ca la intrare
-	add esp, 10  ; dword + word + dword = 10B
+    ; add esp, 10  ; dword + word + dword = 10B
+	mov esp, ebp  ; mai elegant
 
-    ret  ; <=> pop eip
+	ret ; <=> pop eip
