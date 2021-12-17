@@ -107,17 +107,17 @@ main:
 
 	; enter x, 0
 	; <=>
-	;	push ebp
-	;	mov ebp, esp
-	;	sub esp, x
+	;  push ebp
+	;  mov ebp, esp
+	;  sub esp, x
 
 	push dword [len]
 	push v	; v == ptr la vector
 	push word 2
 	call compute_occurrences
 	; <=>
-	;	push eip_prima_instr_de_dupa_call
-	;   jmp compute_occurrences
+	;  push eip_prima_instr_de_dupa_call
+	;  jmp compute_occurrences
 
 	; stiva:
 	;	[len]
@@ -136,4 +136,4 @@ main:
 	;  mov esp, ebp
 	;  pop ebp
 
-    ret
+	ret
