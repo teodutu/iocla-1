@@ -7,8 +7,9 @@ section .text
 main:
     mov eax, 1
     mov ebx, 1
-    cmp eax, ebx
-    add ecx, 1                  ; Comenteaza aceasta linie
+    mov ecx, 1
+    cmp eax, ebx                ; ZF == 1
+    add ecx, 1                  ; add seteaza si el acelasi EFLAGS
     je print
     ret
 

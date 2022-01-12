@@ -1,17 +1,17 @@
 NASM = nasm
-AFILES = instructions.asm demo.asm
+AFILES = demo.asm
 OBJS = $(AFILES:.asm=.o)
-ASM_FLAGS = -f elf32 -g -F dwarf
-LD = gcc
-LDFLAGS = -m32 -g -fno-pie -no-pie
-BINARIES = instructions demo
+ASM_FLAGS = -f elf32 -g
+LD=gcc
+LDFLAGS = -m32 -g
+BINARIES = demo
 
 all : $(BINARIES)
 
 %.o : %.asm
 	$(NASM) $(ASM_FLAGS) -o $@ $<
 
-%: %.o
+mean: mean.o
 	$(LD) $(LDFLAGS) -o $@ $^
 
 clean:
