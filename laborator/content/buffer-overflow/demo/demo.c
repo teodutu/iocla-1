@@ -1,22 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void manele(int x)
+void manele(int param)
 {
 	printf("GGWP!\n");
 
-	if (x == 0xDEADC0DE)
+	if (param == 0xDEADC0DE)
 		printf("OMG!\n");  // TODO for you
 }
 
 void read_data()
 {
-	unsigned int x = 2;
+	unsigned int val = 2;
 	char s[10];
 
 	scanf("%s", s);
 
-	if (x == 0xCAFEBABE)
+	if (val == 0xCAFEBABE)
 		printf("So far, so good!\n");
 }
 
