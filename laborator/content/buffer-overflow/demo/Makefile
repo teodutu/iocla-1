@@ -1,13 +1,8 @@
 CC=gcc
-CFLAGS=-m32 -no-pie -fno-omit-frame-pointer -fno-stack-protector
+CFLAGS=-m32 -fno-pic -fno-omit-frame-pointer -fno-stack-protector
+LDFLAGS=-no-pie
 
-all: demo_no-pie demo_no-pie_no-pic
-
-demo_no-pie: demo.c
-	$(CC) $(CFLAGS) $^ -o $@
-
-demo_no-pie_no-pic: demo.c
-	$(CC) $(CFLAGS) -fno-pic $^ -o $@
+all: demo
 
 clean:
-	rm -rf *.o demo_* payload .gdb_history
+	rm -rf *.o demo payload .gdb_history

@@ -1,27 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-void rip_dani_mocanu()
+void manele(int x)
 {
-	printf(
-		"Dani Mocanu s-a lasat de manele :(((\n"
-		"https://www.youtube.com/watch?v=hp-MjbsKQkM\n"
-	);
-}
+	printf("GGWP!\n");
 
+	if (x == 0xDEADC0DE)
+		printf("OMG!\n");  // TODO for you
+}
 
 void read_data()
 {
 	unsigned int x = 2;
-	char s[32];
-
-	printf("RIP Dani Mocanu!\n");
+	char s[10];
 
 	scanf("%s", s);
-	printf("0x%08X\n", x);
-}
 
+	if (x == 0xCAFEBABE)
+		printf("So far, so good!\n");
+}
 
 int main(void)
 {
