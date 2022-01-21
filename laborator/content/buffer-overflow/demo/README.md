@@ -1,131 +1,82 @@
-# Laborator 10 - Explicatii
-Am compilat demo-ul cu urmatoarele flaguri, pentru a fi mai facil atacul pe
-care intentionam sa-l facem:
-```
--no-pie
--fno-omit-frame-pointer
--fno-stack-protector
-```
-Optional, se pot adauga si flagurile `-fno-pie`/`-fno-pic`.
+# Buffer Overflow - Writeup
+## Description
+We decompile the program in [Ghidra](https://github.com/NationalSecurityAgency/ghidra/) and notice the following:
+1. It reads a string of 10 bytes, using `scanf`.
+2. The buffer into which the input is read is placed on the stack.
+Let's call it `buff`.
+3. There is another variable in the `read_data` function, that is initialised with 2.
+Let's call this variable `var`.
+If its value is `0xcafebabe`, the string `"So far, so good!"` is printed.
+4. There is an unused function, called `manele`.
+
+### Input
+This one is obvious: the program reads a string into a 10-byte stack buffer, using `scanf`.
+
+### Vulnerabilities
+There are no [stack canaries](https://www.sans.org/blog/stack-canaries-gingerly-sidestepping-the-cage/).
+This is visible both by looking at the disassembled code and by looking at the `-fno-stack-protector` in the makefile.
+
+`scanf` is vulnerable because it doesn't stop reading until it finds a space, or a `\n`.
+Therefore, we can perform a buffer overflow attack to overwrite the contents of the stack, such as `var`, or the return address.
 
 
-## Scop
-Programul `demo` afiseaza `"RIP Dani Mocanu!"`, dupa care citeste un string si
-se termina. Inspectandu-l cu `ghidra`/`objdump`, observam 3 aspecte:
-1. Citirea stringului se face in functia `read_data()`, prin `scanf()`, care
-citeste caractere pana la spatiu sau `\n`, deci poate teoretic sa citeasca
-oricate caractere, ceea ce reprezinta o **vulnerabilitate**.
-2. Bufferul in care se citeste stringul este pe **stiva**, deci daca am scrie in
-el mai multe date decat capacitatea sa, am putea suprascrie `EIP`-ului
-functiei apelante, iar cand se va executa `ret`, se va executa cod de la adresa
-suprascrisa de noi.
-3. Exista o functie neapelata, `rip_dani_mocanu()` pe care, in onoarea legendei
-manelelor autohtone, trebuie s-o apelam cumva.
-
-Deci vrem sa facem un *buffer overflow* in stringul de pe stiva functiei
-`read_data()`, prin care sa suprascriem `EIP`-ul salvat, astfel incat, dupa ce
-se incheie `read_data()`, executia sa continue de la inceputul functiei
-`rip_dani_mocanu()`.
-
-
-## Strategie
-Ca sa efectuam atacul propriu-zis trebuie sa stim doua lucruri.
-
-Primul e offsetul fata de `EBP` la care a plasat compilatorul stringul in care
-se face citirea cu `scanf()`. Folsind `objdump`, vedem instructiunile:
-```
-lea    eax,[ebp-0x2c]
+## The Attack
+### Overwriting `var`
+We use `objdump -M intel -d demo` to disassemble the binary.
+From the snippet below, we see that `var` is placed at `ebp - 0xc` and `buff` is at `ebp - 0x16`. 
+```asm
+mov    DWORD PTR [ebp-0xc],0x2
+sub    esp,0x8
+lea    eax,[ebp-0x16]
 push   eax
-push   0x804a06a
-call   8049090 <__isoc99_scanf@plt>
+push   0x804a013
+call   80490b0 <__isoc99_scanf@plt>
 ```
-Din ele deducem ca stringul incepe de la `EBP - 0x2c`.
+In order to overwrite `var`, we first need to reach it.
+To do so, we must fill the contents of `buff` with random bytes.
+We call those bytes _padding_.
 
-Apoi, avem nevoie sa stim unde e `EIP`-ul pe stiva. Din
-[laboratorul 7](https://ocw.cs.pub.ro/courses/iocla/laboratoare/laborator-07)
-stim ca `EIP`-ul e pus la `EBP + 4`. Vedeti si imaginea de mai jos.
-![](https://ocw.cs.pub.ro/courses/_media/iocla/laboratoare/function_stack1.jpg?cache=)
+Therefore, we need a padding of `0x16 - 0xc = 10` bytes.
+Then, we need to provide the contents of `var`.
+We want it to be `0xCAFEBABE`.
 
-Acum stim tot ce avem neovie ca sa cream atacul. El consta in formarea unui
-**payload**, adica a unui string pe care il va citi programul `demo`. Payloadul
-trebuie sa contina un **padding** (caractere de umplutura) cu lungimea de
-`0x2c + 4` caractere, cu care sa "umplem" stiva de unde citeste `scanf()`-ul si
-pana la `EIP`-ul pe care vrem sa-l suprascriem, urmat de adresa de la care vrem
-sa se execute codul. Adresa asta o luam tot din outputul din `objdump`, si anume
-`0x080491b6`.
+But, keep in mind that our CPUs' byte orders are **little endian**.
+So we can't just write it simply as `"\xca\xfe\xba\xbe"`.
+Instead, we need to write the bytes in reverse order: `"\xbe\xba\xfe\xce"`.
 
-Cel mai simplu mod sa cream un astfel de string e in *Python*:
+Putting it together so far, the payload looks like this:
+```python
+payload = "a" * 10 + "\xbe\xba\xfe\xce"
 ```
-python -c 'print "a" * (0x2c + 4) + "\xb6\x91\x04\x08"' | ./demo_no-pie_no-pic
+
+### "Calling" `manele`
+We are now building on top of the attack above and are adding to that payload.
+
+In order to execute code _of our choosing_, we need to overwrite a **code pointer** (return address, function pointer etc.).
+The closest one to our input is the return address on the stack of `read_data`.
+
+In order to overwrite said return address, we need to further pad the above `payload` until we reach the return address.
+In the previous section, we saw that `var` is placed at `ebp-0xc`.
+It's 4 bytes wide, so it ends `ebp-0x8`.
+We know from [lab 9](https://ocw.cs.pub.ro/courses/iocla/laboratoare/laborator-09) that the return address is placed at `ebp+0x4`.
+So the amount of padding we'll need is `0x8 + 0x4 = 12` bytes.
+We will end up overwriting the old `ebp` as well, but we don't care.
+This will result in a seg fault, but only **after** we're done with our exploit.
+
+Now all we need is to provide the address of `manele`.
+We find it using `nm`:
+``` bash
+$ nm demo | grep manele
+080491d6 T manele
 ```
-Payloadul e format din 48 (`0x2c + 4`) de caractere `"a"` (paddingul), urmate
-de adresa functiei `rip_dani_mocanu()` **scrisa little endian**.
 
-
-## Parametrii de compilare
-Sa explicam parametrii cu care am compilat codul. Incercati sa compilati si fara
-ei si observati cum se schimba outputul din `objdump`.
-
-### -fno-omit-frame-pointer
-Din cand in cand, pentru functii scurte, compilatorul decide sa nu mai creeze
-un cadru de stiva nou si nu mai adauga secventele de mai jos:
+All in all, the complete payload for our attack is:
+```python
+payload = "a" * 10 + "\xbe\xba\xfe\xce" + "a" * 12 + "\xd6\x91\x04\x08"
 ```
-push ebp
-mov ebp, esp
-...
-mov esp, ebp
-pop ebp
-```
-Pentru atacul pe care vrem sa-l facem, avem nevoie de crearea unui cadru de
-stiva pentru functia `read_data()` si de aici nevoia de flagul asta.
 
-### -fno-stack-protector
-Pentru a proteja programul de atacuri de tip *buffer overflow*, compilatorul
-adauga pe stiva, intre variabilele locale si `EBP`-ul functiei apelante ceea ce
-se cheama
-[stack canaries](https://en.wikipedia.org/wiki/Buffer_overflow_protection#Canaries).
-Ele sunt cel mai adesea niste valori generate aleator la runtime. Practic, se
-generaza **o singura valoare** pentru fieacre proces, care este scrisa pe stiva
-tuturor functiilor acelui proces intre variabilele locale si `EBP`-ul
-apelantului. La finalul functiei, inainte de `leave; ret`, se verifica daca
-valoarea scrisa atnerior pe stiva este egala cu cea generata initial. In caz
-contrar, executia se incheie imediat si sa afiseaza:
-```
-*** stack smashing detected ***: <fisier_executabil> terminated
-Aborted (core dumped)
-```
-Deci, *stack canaries* previn suprascrierea prin *buffer overflow* a valorilor
-`EBP`-ului si `EIP`-ului apelantului.
 
-### -no-pie
-Un executabil **independent de pozitie (PIE)** inseamna ca adresele
-instructiunilor (vizibile cu `objdump`) sunt *relative*, niste offseturi fata de
-inceputul zonei `.text`. La rulare, loaderul va incarca instructiunile din zona
-`.text` de la o anumita adresa (aleatoare sau nu; depinde daca
-[ASLR-ul](https://www.networkworld.com/article/3331199/what-does-aslr-do-for-linux.html)
-e activat), la care adauga offseturile afisate de `objdump`.
-
-Deci cand avem cod *PIE*, nu putem specifica o adresa ca atare din zona `.text`
-intr-un payload.
-
-### -fno-pic / -fno-pie
-**Atentie!** Difera de `-no-pie` prin faptul ca aceste flaguri actioneaza asupra
-codului, si nu a executabilului. Practic, `-fno-pic` si `-fno-pie` sunt flaguri
-pentru compilatorul inclus in *GCC*, iar `-no-pie` este pentru linkerul care
-genereaza executabilu efectiv. `-fno-pic` si `-fno-pie` fac ca datele din zone
-precum `.data` si `.bss` sa fie accesate relativ la `EIP`, si nu prin adresa
-propriu-zisa.
-
-In general, aceste doua flaguri au efecte foarte similare, dar `-fno-pic` este
-destinat bibliotecilor dinamice, iar `-fno-pie` fisierelor executabile. De
-altfel, si eu am folosit `-fno-pic` in `Makefile`.
-
-Accesarea `EIP`-ului se face prin constructii precum `__x86.get_pc_thunk.bx`,
-al caror cod il putem vedea tot cu `objdump`. Constructia are rolul de a salva
-`EIP`-ul in `EBX`, iar codul sau este urmatorul:
-```
-mov    ebx,DWORD PTR [esp]
-ret
- ```
-Incercati sa intelegeti cum functioneaza! Va ajuta sa intelegeti mai bine ce
-contine un stack frame.
+## Further Work
+### Pass the right argument to `manele`
+If you have no life, you can try to "call" `manele` with the right argument so that the string `"OMG!"` is also printed.
+Look at a typical stack frame and think how far apart should the address of `manele` and the argument be in your payload.

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-m32 -fno-pic -fno-omit-frame-pointer -fno-stack-protector
+CFLAGS=-m32 -fno-pic -fno-stack-protector
 LDFLAGS=-no-pie
 
 all: demo
