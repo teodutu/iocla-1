@@ -15,6 +15,8 @@ void read_data()
 	char s[10];
 
 	scanf("%s", s);
+	// gets(s);
+	// fgets(s, 32, stidn);
 
 	if (val == 0xCAFEBABE)
 		printf("So far, so good!\n");
