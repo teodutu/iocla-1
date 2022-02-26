@@ -5,7 +5,7 @@
 void mirror(char *s)
 {
 	/* TODO */
-	s[0] = '0';
+	(void) s;
 }
 
 int main()
