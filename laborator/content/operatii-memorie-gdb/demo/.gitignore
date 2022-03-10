@@ -2,4 +2,4 @@ demo_address_space
 demo_ptr
 demo_func_ptr
 demo_endianness
-
+demo_shifts
