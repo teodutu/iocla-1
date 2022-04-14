@@ -5,7 +5,7 @@ struc demo_struct
 	int_x resd 1
 	str_z resb 100
 endstruc
-; [ short_y (2B) | int_x (4B) | "Manele 2022\0" ]
+; [ short_y (2B) | int_x (4B) | 100B ]
 
 ; in C:
 ; struct demo_struct2 {
@@ -32,8 +32,8 @@ global main
 
 ; void print_pos(int *arr, int pos)
 print_pos:
-    push ebp
-    mov ebp, esp
+	push ebp
+	mov ebp, esp
 
 	mov eax, [ebp + 8]		; arr -> ebp + 8
 	mov ecx, [ebp + 12]		; pos -> ebp + 12
@@ -45,12 +45,12 @@ print_pos:
 	PRINTF32 `arr[pos] = %d\n\x0`, [eax + ecx * 4]
 
 	leave
-    ret
+	ret
 
 
 main:
-    push ebp
-    mov ebp, esp
+	push ebp
+	mov ebp, esp
 
 	PRINTF32 `int_x = %d\n\x0`, int_x
 	PRINTF32 `str_z = %d\n\x0`, str_z
@@ -62,5 +62,5 @@ main:
 	push arr
 	call print_pos
 
-    leave
-    ret
+	leave
+	ret
